@@ -1,5 +1,5 @@
-const CACHE = 'decided-now-v2';
-const SHELL = ['/', '/index.html'];
+const CACHE = 'decided-now-v3';
+const SHELL = ['/decided-now/', '/decided-now/index.html'];
 
 // Install — cache app shell
 self.addEventListener('install', e => {
