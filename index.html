@@ -255,7 +255,7 @@ body.keyboard-nav #poster-link:focus {
 <div class="screen active" id="home" onclick="goTo('cinefilo')">
   <div class="home-block">
     <span class="home-decided">DECIDED</span>
-    <span class="home-now">NOW.</span>
+    <span class="home-now" id="dev-trigger">NOW.</span>
     <span class="home-tagline">Picked by humans.</span>
   </div>
 </div>
@@ -1031,14 +1031,15 @@ function buyNow() {
   document.addEventListener('mousedown',   function(){ document.body.classList.remove('keyboard-nav'); });
 })();
 
-// ── TRIPLE TAP → DEV MODE (saltea paywall) ───────────────────
-var _devTaps = 0, _devTimer;
-document.addEventListener('touchstart', function() {
+// ── TRIPLE CLICK en NOW. → DEV MODE ──────────────────────────
+var _devClicks = 0, _devTimer;
+function devTrigger(e) {
+  e.stopPropagation();
   clearTimeout(_devTimer);
-  _devTaps++;
-  _devTimer = setTimeout(function(){ _devTaps = 0; }, 800);
-  if (_devTaps >= 3) {
-    _devTaps = 0;
+  _devClicks++;
+  _devTimer = setTimeout(function(){ _devClicks = 0; }, 800);
+  if (_devClicks >= 3) {
+    _devClicks = 0;
     paid = true;
     usageCount = 0;
     var t = document.getElementById('dev-toast');
@@ -1053,7 +1054,8 @@ document.addEventListener('touchstart', function() {
     clearTimeout(t._hide);
     t._hide = setTimeout(function(){ t.style.opacity = '0'; }, 2500);
   }
-}, {passive: true});
+}
+document.getElementById('dev-trigger').addEventListener('click', devTrigger);
 
 // ── SERVICE WORKER ───────────────────────────────────────────
 if ('serviceWorker' in navigator) {
