@@ -1052,7 +1052,7 @@ function devTrigger(e) {
     t.style.opacity = '1';
     clearTimeout(t._hide);
     t._hide = setTimeout(function(){ t.style.opacity = '0'; }, 2500);
-    setTimeout(function(){ showDecision(); }, 400);
+    setTimeout(function(){ goTo('home'); }, 400);
   }
 }
 document.getElementById('dev-trigger').addEventListener('click', devTrigger);
