@@ -1064,6 +1064,7 @@ function devTrigger(e) {
     _devClicks = 0;
     paid = true;
     usageCount = 0;
+    try { localStorage.setItem('dn_paid','1'); localStorage.setItem('dn_uses','0'); } catch(e) {}
     var t = document.getElementById('dev-toast');
     if (!t) {
       t = document.createElement('div');
