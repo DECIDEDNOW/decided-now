@@ -255,7 +255,7 @@ body.keyboard-nav #poster-link:focus {
 <div class="screen active" id="home" onclick="goTo('cinefilo')">
   <div class="home-block">
     <span class="home-decided">DECIDED</span>
-    <span class="home-now" id="dev-trigger">NOW.</span>
+    <span class="home-now">NOW.</span>
     <span class="home-tagline">Picked by humans.</span>
   </div>
 </div>
@@ -347,7 +347,7 @@ body.keyboard-nav #poster-link:focus {
 
 <!-- PAYWALL -->
 <div class="screen" id="paywall">
-  <div class="pw-stop">STOP<br>SCROLLING.<br>START<br>LIVING.</div>
+  <div class="pw-stop" id="dev-trigger">STOP<br>SCROLLING.<br>START<br>LIVING.</div>
   <div class="pw-sub">Unlimited decisions.<br>One small price.</div>
   <div class="pw-price">$1.99</div>
   <div class="pw-once">ONE-TIME</div>
@@ -1031,10 +1031,9 @@ function buyNow() {
   document.addEventListener('mousedown',   function(){ document.body.classList.remove('keyboard-nav'); });
 })();
 
-// ── TRIPLE CLICK en NOW. → DEV MODE ──────────────────────────
+// ── TRIPLE CLICK en "STOP SCROLLING" → DEV MODE ──────────────
 var _devClicks = 0, _devTimer;
 function devTrigger(e) {
-  e.stopPropagation();
   clearTimeout(_devTimer);
   _devClicks++;
   _devTimer = setTimeout(function(){ _devClicks = 0; }, 800);
