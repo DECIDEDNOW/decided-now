@@ -1031,6 +1031,50 @@ function buyNow() {
   document.addEventListener('mousedown',   function(){ document.body.classList.remove('keyboard-nav'); });
 })();
 
+// ── TRIPLE TAP → WAKE LOCK (pantalla no se apaga) ────────────
+(function(){
+  let taps = 0, timer;
+  let wakeLock = null;
+  let active = false;
+
+  function showToast(msg) {
+    let t = document.getElementById('wl-toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'wl-toast';
+      t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#222;color:#FFC700;font-size:13px;font-weight:700;letter-spacing:.05em;padding:8px 18px;border-radius:20px;z-index:9999;pointer-events:none;transition:opacity .4s';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1';
+    clearTimeout(t._hide);
+    t._hide = setTimeout(() => t.style.opacity = '0', 2000);
+  }
+
+  async function toggleWakeLock() {
+    if (!('wakeLock' in navigator)) { showToast('Wake Lock no soportado'); return; }
+    if (active && wakeLock) {
+      await wakeLock.release();
+      wakeLock = null;
+      active = false;
+      showToast('🔒 Pantalla normal');
+    } else {
+      try {
+        wakeLock = await navigator.wakeLock.request('screen');
+        active = true;
+        showToast('👁 Pantalla activa');
+        wakeLock.addEventListener('release', () => { active = false; });
+      } catch(e) { showToast('Error: ' + e.message); }
+    }
+  }
+
+  document.addEventListener('touchend', function() {
+    taps++;
+    if (taps === 1) timer = setTimeout(() => { taps = 0; }, 600);
+    if (taps >= 3) { taps = 0; clearTimeout(timer); toggleWakeLock(); }
+  });
+})();
+
 // ── SERVICE WORKER ───────────────────────────────────────────
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
