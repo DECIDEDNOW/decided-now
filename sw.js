@@ -1,4 +1,4 @@
-const CACHE = 'decided-now-v4';
+const CACHE = 'decided-now-v5';
 const SHELL = ['/', '/index.html'];
 
 // Install — cache app shell
