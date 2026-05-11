@@ -236,6 +236,8 @@ body.keyboard-nav #poster-link:focus {
 }
 @media screen and (orientation: landscape) and (min-width: 900px) {
   #app { max-width: 100vw; left: 0; transform: none; }
+  /* Center paywall + seen-limit in a 430px column on wide screens */
+  #paywall, #seen-limit { padding-left: max(calc(50vw - 215px), 40px); padding-right: max(calc(50vw - 215px), 40px); }
   /* HOME */
   .home-block { right: 6vw; top: 50%; transform: translateY(-50%); }
   .home-decided, .home-now, .cinefilo-word { font-size: clamp(80px, 12vw, 200px); }
@@ -1100,8 +1102,9 @@ function buyNow() {
 
 // ── SERVICE WORKER ───────────────────────────────────────────
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/sw.js').catch(function(){});
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+  navigator.serviceWorker.addEventListener('controllerchange', function() {
+    window.location.reload();
   });
 }
 </script>
