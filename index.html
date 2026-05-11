@@ -199,6 +199,17 @@ html, body {
   letter-spacing: 0.06em; -webkit-tap-highlight-color: transparent; padding: 6px 0;
 }
 
+/* ══ SEEN-LIMIT ══ */
+#seen-limit { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 32px; text-align: center; }
+.sl-title { font-family: 'Share', sans-serif; font-weight: 700; font-size: 46px; line-height: 1.05; letter-spacing: -0.02em; text-transform: uppercase; margin-bottom: 22px; }
+.sl-title span.sl-muted { color: rgba(255,255,255,0.35); }
+.sl-title span.sl-bold { color: #fff; }
+.sl-headline { font-family: 'Share', sans-serif; font-weight: 700; font-size: 28px; color: #fff; line-height: 1.15; text-transform: uppercase; letter-spacing: -0.01em; margin-bottom: 16px; }
+.sl-sub { font-family: 'Share', sans-serif; font-weight: 400; font-size: 15px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.06em; line-height: 1.6; margin-bottom: 44px; }
+.sl-btns { display: flex; gap: 14px; }
+.sl-btn { font-family: 'Share', sans-serif; font-weight: 400; font-size: 14px; color: rgba(255,255,255,0.8); border: 1.5px solid rgba(255,255,255,0.4); border-radius: 100px; padding: 13px 22px; background: none; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 0.08s; text-transform: uppercase; letter-spacing: 0.04em; }
+.sl-btn:active { transform: scale(0.94); }
+
 /* ══ PAYWALL ══ */
 #paywall { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 32px; text-align: center; }
 .pw-stop { font-family: 'Share', sans-serif; font-weight: 700; font-size: 46px; line-height: 1.05; letter-spacing: -0.02em; color: #FFC700; text-transform: uppercase; margin-bottom: 18px; }
@@ -383,6 +394,17 @@ body.keyboard-nav #poster-link:focus {
   <button class="pw-btn" onclick="buyNow()">GET DECIDED NOW.</button>
 </div>
 
+<!-- SEEN-LIMIT (paid users daily cap) -->
+<div class="screen" id="seen-limit">
+  <div class="sl-title"><span class="sl-muted">LIMIT</span><br><span class="sl-bold">REACHED.</span></div>
+  <div class="sl-headline">YOUR TIME IS MORE<br>VALUABLE THAN A SCROLL.</div>
+  <div class="sl-sub">Come back tomorrow<br>or choose what we recommend.</div>
+  <div class="sl-btns">
+    <button class="sl-btn" onclick="revisitPick(0)">REVISIT PICK 1</button>
+    <button class="sl-btn" onclick="revisitPick(1)">REVISIT PICK 2</button>
+  </div>
+</div>
+
 <script>
 const S = { depth: null, platforms: new Set(), mood: null, format: 'movie' };
 let usageCount = 0;
@@ -393,6 +415,7 @@ try {
 } catch(e) {}
 let filteredList = [];
 let currentIdx = 0;
+let dailyPicks = []; // stores last 2 movies shown to paid users
 
 const CATALOG = [
   {id:1,  title:"Squid Game",                 year:2021, format:"series", depth:"light", moods:["tension"],           platforms:["netflix"],            poster:"https://image.tmdb.org/t/p/w500/1QdXdRYfktUSONkl1oD5gc6Be0s.jpg", links:{netflix:"https://www.netflix.com/title/81040344"}},
@@ -862,7 +885,7 @@ const CATALOG = [
   {id:436, title:"Salvador",                     year:2025, format:"series", depth:"deep",  moods:["tension","focus"],           platforms:["netflix"],             poster:"https://images.justwatch.com/poster/336369000/s332/salvador.webp",               links:{netflix:"https://www.netflix.com/title/81716369"}},
   {id:437, title:"Mar adentro",                  year:2004, format:"movie",  depth:"deep",  moods:["focus"],                    platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/9fhJMqvmHpNJHhfHJ5BsmEnFXFq.jpg",              links:{netflix:"https://www.netflix.com/title/70028516"}},
   {id:438, title:"Perfect Days",                 year:2023, format:"movie",  depth:"deep",  moods:["switchoff","focus"],         platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/6gP2MBMOHYKqHkxIBmPMg0rXmHd.jpg",              links:{netflix:"https://www.netflix.com/title/81659333"}},
-  {id:439, title:"El secreto de sus ojos",       year:2009, format:"movie",  depth:"deep",  moods:["tension","focus"],           platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/cVUzGHBMfXc5KbQsMCKsWNGk8Po.jpg",              links:{netflix:"https://www.netflix.com/title/70131482"}},
+  {id:439, title:"El secreto de sus ojos",       year:2009, format:"movie",  depth:"deep",  moods:["tension","focus"],           platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/dkeAwfZzwL3WvToydE3CXiY80E0.jpg",              links:{netflix:"https://www.netflix.com/title/70131482"}},
   {id:440, title:"Lupin",                        year:2021, format:"series", depth:"light", moods:["tension","switchoff"],       platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/sgNcGHoRMRTSxDTlmAmItGPBrUL.jpg",              links:{netflix:"https://www.netflix.com/title/80994082"}},
   {id:441, title:"The Lincoln Lawyer",           year:2022, format:"series", depth:"light", moods:["tension","focus"],           platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/zOO8JxcHPJBDGe8Jf1B2exvwnqq.jpg",              links:{netflix:"https://www.netflix.com/title/81445762"}},
   {id:442, title:"Clanes",                       year:2024, format:"series", depth:"deep",  moods:["tension"],                   platforms:["netflix"],             poster:"https://images.justwatch.com/poster/320631750/s332/clanes.webp",                links:{netflix:"https://www.netflix.com/title/81631750"}},
@@ -958,18 +981,35 @@ function showDecision() {
   goTo('pelicula');
 }
 
+function getDailyKey() { return 'dn_seen_' + new Date().toDateString(); }
+
 function nextRec() {
   if (navigator.vibrate) navigator.vibrate(8);
   if (!paid) {
     usageCount++;
     saveUses();
     if (usageCount > 2) { goTo('paywall'); return; }
+  } else {
+    var seenToday = parseInt(localStorage.getItem(getDailyKey()) || '0');
+    if (seenToday >= 2) { goTo('seen-limit'); return; }
+    localStorage.setItem(getDailyKey(), seenToday + 1);
   }
   currentIdx = (currentIdx + 1) % filteredList.length;
   renderRec(filteredList[currentIdx]);
 }
 
+function revisitPick(n) {
+  if (dailyPicks[n]) {
+    renderRec(dailyPicks[n]);
+    goTo('pelicula');
+  }
+}
+
 function renderRec(movie) {
+  if (paid && !dailyPicks.includes(movie)) {
+    dailyPicks.unshift(movie);
+    if (dailyPicks.length > 2) dailyPicks.length = 2;
+  }
   var img  = document.getElementById('movie-poster');
   var wrap = document.getElementById('poster-link');
   wrap.classList.remove('img-loading', 'img-error');
@@ -1075,33 +1115,6 @@ function buyNow() {
   document.addEventListener('touchstart',  function(){ document.body.classList.remove('keyboard-nav'); });
   document.addEventListener('mousedown',   function(){ document.body.classList.remove('keyboard-nav'); });
 })();
-
-// ── TRIPLE CLICK en "STOP SCROLLING" → DEV MODE ──────────────
-var _devClicks = 0, _devTimer;
-function devTrigger(e) {
-  clearTimeout(_devTimer);
-  _devClicks++;
-  _devTimer = setTimeout(function(){ _devClicks = 0; }, 800);
-  if (_devClicks >= 3) {
-    _devClicks = 0;
-    paid = true;
-    usageCount = 0;
-    try { localStorage.setItem('dn_paid','1'); localStorage.setItem('dn_uses','0'); } catch(e) {}
-    var t = document.getElementById('dev-toast');
-    if (!t) {
-      t = document.createElement('div');
-      t.id = 'dev-toast';
-      t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#222;color:#FFC700;font-size:13px;font-weight:700;letter-spacing:.05em;padding:8px 18px;border-radius:20px;z-index:9999;pointer-events:none;transition:opacity .4s';
-      document.body.appendChild(t);
-    }
-    t.textContent = '🔓 Dev mode ON';
-    t.style.opacity = '1';
-    clearTimeout(t._hide);
-    t._hide = setTimeout(function(){ t.style.opacity = '0'; }, 2500);
-    setTimeout(function(){ goTo('home'); }, 400);
-  }
-}
-document.getElementById('dev-trigger').addEventListener('click', devTrigger);
 
 // ── SERVICE WORKER ───────────────────────────────────────────
 if ('serviceWorker' in navigator) {

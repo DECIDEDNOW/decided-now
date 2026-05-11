@@ -1,4 +1,4 @@
-﻿const CACHE = 'decided-now-v7';
+﻿const CACHE = 'decided-now-v8';
 const SHELL = ['/', '/index.html'];
 
 // Install â€” cache app shell
@@ -7,14 +7,15 @@ self.addEventListener('install', e => {
   self.skipWaiting();
 });
 
-// Activate â€” delete old caches
+// Activate — delete old caches then reload all open tabs
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    )
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
+      .then(() => self.clients.matchAll({ type: 'window' }))
+      .then(clients => clients.forEach(c => c.navigate(c.url)))
   );
-  self.clients.claim();
 });
 
 // Fetch â€” cache-first for app shell, network-first for external resources
