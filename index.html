@@ -1032,35 +1032,28 @@ function buyNow() {
 })();
 
 // ── TRIPLE TAP → DEV MODE (saltea paywall) ───────────────────
-(function(){
-  let taps = 0, timer;
-
-  function showToast(msg) {
-    let t = document.getElementById('dev-toast');
+var _devTaps = 0, _devTimer;
+document.addEventListener('touchstart', function() {
+  clearTimeout(_devTimer);
+  _devTaps++;
+  _devTimer = setTimeout(function(){ _devTaps = 0; }, 800);
+  if (_devTaps >= 3) {
+    _devTaps = 0;
+    paid = true;
+    usageCount = 0;
+    var t = document.getElementById('dev-toast');
     if (!t) {
       t = document.createElement('div');
       t.id = 'dev-toast';
       t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#222;color:#FFC700;font-size:13px;font-weight:700;letter-spacing:.05em;padding:8px 18px;border-radius:20px;z-index:9999;pointer-events:none;transition:opacity .4s';
       document.body.appendChild(t);
     }
-    t.textContent = msg;
+    t.textContent = '🔓 Dev mode ON';
     t.style.opacity = '1';
     clearTimeout(t._hide);
-    t._hide = setTimeout(() => t.style.opacity = '0', 2000);
+    t._hide = setTimeout(function(){ t.style.opacity = '0'; }, 2500);
   }
-
-  document.addEventListener('touchend', function() {
-    taps++;
-    if (taps === 1) timer = setTimeout(() => { taps = 0; }, 600);
-    if (taps >= 3) {
-      taps = 0;
-      clearTimeout(timer);
-      paid = true;
-      usageCount = 0;
-      showToast('🔓 Dev mode ON');
-    }
-  });
-})();
+}, {passive: true});
 
 // ── SERVICE WORKER ───────────────────────────────────────────
 if ('serviceWorker' in navigator) {
