@@ -369,9 +369,9 @@ body.keyboard-nav #poster-link:focus {
 <!-- PAYWALL -->
 <div class="screen" id="paywall">
   <div class="pw-stop" id="dev-trigger">STOP<br>SCROLLING.<br>START<br>LIVING.</div>
-  <div class="pw-sub">Unlimited decisions.<br>One small price.</div>
+  <div class="pw-sub">One decision per night.<br>Cancel anytime.</div>
   <div class="pw-price">$1.99</div>
-  <div class="pw-once">ONE-TIME</div>
+  <div class="pw-once">/MONTH</div>
   <ul class="pw-features">
     <li>Unlimited recommendations</li>
     <li>All moods &amp; platforms</li>
@@ -984,6 +984,7 @@ function renderRec(movie) {
 
 function buyNow() {
   if (navigator.vibrate) navigator.vibrate(8);
+  // INSERT STRIPE MONTHLY CHECKOUT LINK HERE
   alert('Stripe checkout — coming soon!');
 }
 
