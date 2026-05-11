@@ -211,13 +211,13 @@ html, body {
 .sl-btn:active { transform: scale(0.94); }
 
 /* ══ PAYWALL ══ */
-#paywall { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; padding: 40px 32px; text-align: right; }
-.pw-stop { font-family: 'Share', sans-serif; font-weight: 700; font-size: 52px; line-height: 1.0; letter-spacing: -0.02em; color: #FFC700; text-transform: uppercase; margin-bottom: 22px; text-align: right; width: 100%; }
-.pw-sub { font-family: 'Share', sans-serif; font-weight: 400; font-size: 15px; color: rgba(255,255,255,0.55); line-height: 1.6; margin-bottom: 22px; text-align: center; width: 100%; text-transform: uppercase; letter-spacing: 0.04em; }
-.pw-price { font-family: 'Share', sans-serif; font-weight: 700; font-size: 58px; color: #fff; line-height: 1; margin-bottom: 22px; text-align: center; width: 100%; }
+#paywall { display: flex; flex-direction: column; align-items: stretch; justify-content: center; padding: 40px 32px; }
+.pw-stop { font-family: 'Share', sans-serif; font-weight: 700; font-size: 52px; line-height: 1.0; letter-spacing: -0.02em; color: #FFC700; text-transform: uppercase; margin-bottom: 22px; text-align: right; }
+.pw-sub { font-family: 'Share', sans-serif; font-weight: 400; font-size: 15px; color: rgba(255,255,255,0.55); line-height: 1.6; margin-bottom: 22px; text-align: center; text-transform: uppercase; letter-spacing: 0.04em; }
+.pw-price { font-family: 'Share', sans-serif; font-weight: 700; font-size: 58px; color: #fff; line-height: 1; margin-bottom: 22px; text-align: center; }
 .pw-once { display: none; }
-.pw-features { font-family: 'Share', sans-serif; font-weight: 400; font-size: 14px; color: rgba(255,255,255,0.45); margin-bottom: 36px; line-height: 2; list-style: none; padding: 0; text-align: center; width: 100%; text-transform: uppercase; letter-spacing: 0.05em; }
-.pw-btn { font-family: 'Share', sans-serif; font-weight: 400; font-size: 17px; color: rgba(255,255,255,0.9); background: none; border: 1.5px solid rgba(255,255,255,0.6); border-radius: 100px; padding: 16px 40px; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 0.08s; text-transform: uppercase; letter-spacing: 0.04em; align-self: center; }
+.pw-features { font-family: 'Share', sans-serif; font-weight: 400; font-size: 14px; color: rgba(255,255,255,0.45); margin-bottom: 36px; line-height: 2; list-style: none; padding: 0; text-align: center; text-transform: uppercase; letter-spacing: 0.05em; }
+.pw-btn { font-family: 'Share', sans-serif; font-weight: 700; font-size: 17px; color: #FFC700; background: none; border: 2px solid #FFC700; border-radius: 100px; padding: 16px 40px; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 0.08s; text-transform: uppercase; letter-spacing: 0.04em; align-self: center; }
 .pw-btn:active { transform: scale(0.94); }
 
 /* ══ TV / LANDSCAPE ══ */
@@ -392,6 +392,11 @@ try {
   usageCount = parseInt(localStorage.getItem('dn_uses') || '0');
   paid = paid || localStorage.getItem('dn_paid') === '1';
 } catch(e) {}
+// ?dev2 → test seen-limit screen (paid + daily cap already hit)
+if (location.search.includes('dev2')) {
+  paid = true;
+  try { localStorage.setItem(('dn_seen_' + new Date().toDateString()), '2'); } catch(e) {}
+}
 let filteredList = [];
 let currentIdx = 0;
 let dailyPicks = []; // stores last 2 movies shown to paid users
