@@ -200,24 +200,24 @@ html, body {
 }
 
 /* ══ SEEN-LIMIT ══ */
-#seen-limit { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 32px; text-align: center; }
-.sl-title { font-family: 'Share', sans-serif; font-weight: 700; font-size: 46px; line-height: 1.05; letter-spacing: -0.02em; text-transform: uppercase; margin-bottom: 22px; }
-.sl-title span.sl-muted { color: rgba(255,255,255,0.35); }
-.sl-title span.sl-bold { color: #fff; }
-.sl-headline { font-family: 'Share', sans-serif; font-weight: 700; font-size: 28px; color: #fff; line-height: 1.15; text-transform: uppercase; letter-spacing: -0.01em; margin-bottom: 16px; }
-.sl-sub { font-family: 'Share', sans-serif; font-weight: 400; font-size: 15px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.06em; line-height: 1.6; margin-bottom: 44px; }
-.sl-btns { display: flex; gap: 14px; }
-.sl-btn { font-family: 'Share', sans-serif; font-weight: 400; font-size: 14px; color: rgba(255,255,255,0.8); border: 1.5px solid rgba(255,255,255,0.4); border-radius: 100px; padding: 13px 22px; background: none; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 0.08s; text-transform: uppercase; letter-spacing: 0.04em; }
+#seen-limit { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; padding: 40px 32px; gap: 0; }
+.sl-title { font-family: 'Share', sans-serif; font-weight: 700; font-size: 52px; line-height: 1.0; letter-spacing: -0.02em; text-transform: uppercase; text-align: right; margin-bottom: 28px; width: 100%; }
+.sl-title span.sl-muted { color: rgba(255,255,255,0.3); display: block; }
+.sl-title span.sl-bold  { color: #FFC700; display: block; }
+.sl-headline { font-family: 'Share', sans-serif; font-weight: 700; font-size: clamp(30px,9vw,42px); color: rgba(255,255,255,0.75); line-height: 1.15; text-transform: uppercase; letter-spacing: -0.01em; margin-bottom: 18px; text-align: right; width: 100%; }
+.sl-sub { font-family: 'Share', sans-serif; font-weight: 400; font-size: 13px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.07em; line-height: 1.7; text-align: center; margin-bottom: 44px; width: 100%; }
+.sl-btns { display: flex; gap: 14px; align-self: flex-start; }
+.sl-btn { font-family: 'Share', sans-serif; font-weight: 400; font-size: 14px; color: #FFC700; border: 1.5px solid #FFC700; border-radius: 100px; padding: 13px 22px; background: none; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 0.08s; text-transform: uppercase; letter-spacing: 0.04em; }
 .sl-btn:active { transform: scale(0.94); }
 
 /* ══ PAYWALL ══ */
-#paywall { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 32px; text-align: center; }
-.pw-stop { font-family: 'Share', sans-serif; font-weight: 700; font-size: 46px; line-height: 1.05; letter-spacing: -0.02em; color: #FFC700; text-transform: uppercase; margin-bottom: 18px; }
-.pw-sub { font-family: 'Share', sans-serif; font-weight: 400; font-size: 17px; color: rgba(255,255,255,0.6); line-height: 1.55; margin-bottom: 32px; }
-.pw-price { font-family: 'Share', sans-serif; font-weight: 700; font-size: 54px; color: #fff; line-height: 1; margin-bottom: 6px; }
-.pw-once { font-family: 'Share', sans-serif; font-weight: 400; font-size: 12px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 32px; }
-.pw-features { font-family: 'Share', sans-serif; font-weight: 400; font-size: 15px; color: rgba(255,255,255,0.5); margin-bottom: 40px; line-height: 2; list-style: none; padding: 0; }
-.pw-btn { font-family: 'Share', sans-serif; font-weight: 700; font-size: 18px; color: #000; background: #FFC700; border: none; border-radius: 100px; padding: 18px 44px; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 0.08s; text-transform: uppercase; letter-spacing: 0.03em; }
+#paywall { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; padding: 40px 32px; text-align: right; }
+.pw-stop { font-family: 'Share', sans-serif; font-weight: 700; font-size: 52px; line-height: 1.0; letter-spacing: -0.02em; color: #FFC700; text-transform: uppercase; margin-bottom: 22px; text-align: right; width: 100%; }
+.pw-sub { font-family: 'Share', sans-serif; font-weight: 400; font-size: 15px; color: rgba(255,255,255,0.55); line-height: 1.6; margin-bottom: 22px; text-align: center; width: 100%; text-transform: uppercase; letter-spacing: 0.04em; }
+.pw-price { font-family: 'Share', sans-serif; font-weight: 700; font-size: 58px; color: #fff; line-height: 1; margin-bottom: 22px; text-align: center; width: 100%; }
+.pw-once { display: none; }
+.pw-features { font-family: 'Share', sans-serif; font-weight: 400; font-size: 14px; color: rgba(255,255,255,0.45); margin-bottom: 36px; line-height: 2; list-style: none; padding: 0; text-align: center; width: 100%; text-transform: uppercase; letter-spacing: 0.05em; }
+.pw-btn { font-family: 'Share', sans-serif; font-weight: 400; font-size: 17px; color: rgba(255,255,255,0.9); background: none; border: 1.5px solid rgba(255,255,255,0.6); border-radius: 100px; padding: 16px 40px; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 0.08s; text-transform: uppercase; letter-spacing: 0.04em; align-self: center; }
 .pw-btn:active { transform: scale(0.94); }
 
 /* ══ TV / LANDSCAPE ══ */
@@ -382,10 +382,9 @@ body.keyboard-nav #poster-link:focus {
 
 <!-- PAYWALL -->
 <div class="screen" id="paywall">
-  <div class="pw-stop" id="dev-trigger">STOP<br>SCROLLING.<br>START<br>LIVING.</div>
+  <div class="pw-stop">STOP<br>SCROLLING.<br>START<br>LIVING.</div>
   <div class="pw-sub">One decision per night.<br>Cancel anytime.</div>
   <div class="pw-price">$1.99</div>
-  <div class="pw-once">/MONTH</div>
   <ul class="pw-features">
     <li>Unlimited recommendations</li>
     <li>All moods &amp; platforms</li>
