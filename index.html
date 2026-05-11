@@ -880,6 +880,136 @@ const CATALOG = [
   {id:454, title:"Obsession",                    year:2023, format:"series", depth:"light", moods:["tension"],                   platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/kT5tdNBDUkqFKLq3oJNgR3OfRqY.jpg",              links:{netflix:"https://www.netflix.com/title/81372832"}},
 ];
 
+const PLAT_NAMES = {
+  netflix:'NETFLIX', apple:'APPLE TV+', hulu:'HULU',
+  disney:'DISNEY+', amazon:'PRIME VIDEO', hbo:'MAX',
+  mubi:'MUBI', mercado:'MERCADO PLAY', paramount:'PARAMOUNT+', pluto:'PLUTO TV'
+};
+
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  var btn = document.getElementById('home-btn');
+  if (btn) { id === 'home' ? btn.classList.remove('visible') : btn.classList.add('visible'); }
+}
+
+function pickDepth(e, d) {
+  e.stopPropagation();
+  if (navigator.vibrate) navigator.vibrate(8);
+  S.depth = d;
+  document.getElementById('opt-light').classList.toggle('on', d === 'light');
+  document.getElementById('opt-deep').classList.toggle('on', d === 'deep');
+  setTimeout(() => goTo('plataformas'), 220);
+}
+
+function togPlat(tile, p) {
+  if (navigator.vibrate) navigator.vibrate(8);
+  if (S.platforms.has(p)) {
+    S.platforms.delete(p);
+    tile.classList.remove('on');
+  } else {
+    S.platforms.add(p);
+    tile.classList.add('on');
+    if (S.platforms.size === 1) setTimeout(() => goTo('animo'), 500);
+  }
+}
+
+function pickMood(el, mood) {
+  if (navigator.vibrate) navigator.vibrate(8);
+  document.querySelectorAll('.mood-word').forEach(m => m.classList.remove('on'));
+  el.classList.add('on');
+  S.mood = mood;
+  setTimeout(showDecision, 280);
+}
+
+function pickFmt(f) {
+  S.format = f;
+  document.querySelectorAll('.fmt-btn').forEach(b => b.classList.remove('on'));
+  document.getElementById('f-' + f).classList.add('on');
+}
+
+function getRecommendations() {
+  const plats = [...S.platforms];
+  let r;
+  r = CATALOG.filter(m => m.format===S.format && m.depth===S.depth && m.moods.includes(S.mood) && m.platforms.some(p=>plats.includes(p)));
+  if (r.length) return r;
+  r = CATALOG.filter(m => m.format===S.format && m.moods.includes(S.mood) && m.platforms.some(p=>plats.includes(p)));
+  if (r.length) return r;
+  r = CATALOG.filter(m => m.format===S.format && m.depth===S.depth && m.moods.includes(S.mood));
+  if (r.length) return r;
+  r = CATALOG.filter(m => m.format===S.format && m.depth===S.depth);
+  if (r.length) return r;
+  return CATALOG;
+}
+
+function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+
+function saveUses() { try { localStorage.setItem('dn_uses', usageCount); } catch(e) {} }
+
+function showDecision() {
+  if (!paid) {
+    usageCount++;
+    saveUses();
+    if (usageCount > 2) { goTo('paywall'); return; }
+  }
+  filteredList = shuffle(getRecommendations());
+  currentIdx = 0;
+  renderRec(filteredList[0]);
+  goTo('pelicula');
+}
+
+function nextRec() {
+  if (navigator.vibrate) navigator.vibrate(8);
+  if (!paid) {
+    usageCount++;
+    saveUses();
+    if (usageCount > 2) { goTo('paywall'); return; }
+  }
+  currentIdx = (currentIdx + 1) % filteredList.length;
+  renderRec(filteredList[currentIdx]);
+}
+
+function renderRec(movie) {
+  var img  = document.getElementById('movie-poster');
+  var wrap = document.getElementById('poster-link');
+  wrap.classList.remove('img-loading', 'img-error');
+  img.onload = function() {
+    this.style.opacity = '1';
+    wrap.classList.remove('img-loading', 'img-error');
+  };
+  img.onerror = function() {
+    this.style.opacity = '0';
+    wrap.classList.remove('img-loading');
+    wrap.classList.add('img-error');
+  };
+  if (img.src !== movie.poster) {
+    img.style.opacity = '0';
+    wrap.classList.add('img-loading');
+  }
+  img.alt = movie.title;
+  img.src = movie.poster;
+  if (img.complete && img.naturalWidth > 0) {
+    img.style.opacity = '1';
+    wrap.classList.remove('img-loading', 'img-error');
+  }
+  document.getElementById('movie-title-text').textContent = movie.title;
+  document.getElementById('movie-year-text').textContent = movie.year + '  /  ' + (movie.format === 'series' ? 'SERIES' : 'MOVIE');
+  const plats = [...S.platforms];
+  let avail = movie.platforms.find(p => plats.includes(p)) || movie.platforms[0];
+  if (avail === 'hulu' && movie.links && movie.links.disney) { avail = 'disney'; }
+  const watchUrl = (movie.links && movie.links[avail]) || '#';
+  const link = document.getElementById('watch-link');
+  link.textContent = 'WATCH ON ' + (PLAT_NAMES[avail] || avail.toUpperCase()) + '.';
+  link.href = watchUrl;
+  wrap.href = watchUrl;
+}
+
+function buyNow() {
+  if (navigator.vibrate) navigator.vibrate(8);
+  // INSERT STRIPE MONTHLY CHECKOUT LINK HERE
+  alert('Stripe checkout — coming soon!');
+}
+
 // ── TV / KEYBOARD NAVIGATION ─────────────────────────────────
 (function() {
   function makeFocusable() {
