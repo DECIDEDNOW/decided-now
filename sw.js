@@ -1,13 +1,13 @@
-const CACHE = 'decided-now-v5';
+﻿const CACHE = 'decided-now-v6';
 const SHELL = ['/', '/index.html'];
 
-// Install — cache app shell
+// Install â€” cache app shell
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)));
   self.skipWaiting();
 });
 
-// Activate — delete old caches
+// Activate â€” delete old caches
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -17,7 +17,7 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-// Fetch — cache-first for app shell, network-first for external resources
+// Fetch â€” cache-first for app shell, network-first for external resources
 self.addEventListener('fetch', e => {
   const url = e.request.url;
 
@@ -45,3 +45,4 @@ self.addEventListener('fetch', e => {
     })
   );
 });
+
