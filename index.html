@@ -200,23 +200,25 @@ html, body {
 }
 
 /* ══ SEEN-LIMIT ══ */
-#seen-limit { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; padding: 40px 32px; gap: 0; }
-.sl-title { font-family: 'Share', sans-serif; font-weight: 700; font-size: 52px; line-height: 1.0; letter-spacing: -0.02em; text-transform: uppercase; text-align: right; margin-bottom: 28px; width: 100%; }
-.sl-title span.sl-muted { color: rgba(255,255,255,0.3); display: block; }
+#seen-limit { display: flex; align-items: center; justify-content: center; }
+.sl-inner { width: 100%; max-width: 390px; padding: 48px 32px; display: flex; flex-direction: column; }
+.sl-title { font-family: 'Share', sans-serif; font-weight: 700; font-size: 56px; line-height: 1.0; letter-spacing: -0.02em; text-transform: uppercase; text-align: right; margin-bottom: 32px; }
+.sl-title span.sl-muted { color: rgba(255,255,255,0.28); display: block; }
 .sl-title span.sl-bold  { color: #FFC700; display: block; }
-.sl-headline { font-family: 'Share', sans-serif; font-weight: 700; font-size: clamp(30px,9vw,42px); color: rgba(255,255,255,0.75); line-height: 1.15; text-transform: uppercase; letter-spacing: -0.01em; margin-bottom: 18px; text-align: right; width: 100%; }
-.sl-sub { font-family: 'Share', sans-serif; font-weight: 400; font-size: 13px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.07em; line-height: 1.7; text-align: center; margin-bottom: 44px; width: 100%; }
-.sl-btns { display: flex; gap: 14px; align-self: flex-start; }
+.sl-headline { font-family: 'Share', sans-serif; font-weight: 700; font-size: 34px; color: rgba(255,255,255,0.75); line-height: 1.15; text-transform: uppercase; letter-spacing: -0.01em; margin-bottom: 20px; text-align: right; }
+.sl-sub { font-family: 'Share', sans-serif; font-weight: 400; font-size: 13px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.07em; line-height: 1.7; text-align: center; margin-bottom: 48px; }
+.sl-btns { display: flex; gap: 14px; }
 .sl-btn { font-family: 'Share', sans-serif; font-weight: 400; font-size: 14px; color: #FFC700; border: 1.5px solid #FFC700; border-radius: 100px; padding: 13px 22px; background: none; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 0.08s; text-transform: uppercase; letter-spacing: 0.04em; }
 .sl-btn:active { transform: scale(0.94); }
 
 /* ══ PAYWALL ══ */
-#paywall { display: flex; flex-direction: column; align-items: stretch; justify-content: center; padding: 40px 32px; }
-.pw-stop { font-family: 'Share', sans-serif; font-weight: 700; font-size: 52px; line-height: 1.0; letter-spacing: -0.02em; color: #FFC700; text-transform: uppercase; margin-bottom: 22px; text-align: right; }
-.pw-sub { font-family: 'Share', sans-serif; font-weight: 400; font-size: 15px; color: rgba(255,255,255,0.55); line-height: 1.6; margin-bottom: 22px; text-align: center; text-transform: uppercase; letter-spacing: 0.04em; }
-.pw-price { font-family: 'Share', sans-serif; font-weight: 700; font-size: 58px; color: #fff; line-height: 1; margin-bottom: 22px; text-align: center; }
+#paywall { display: flex; align-items: center; justify-content: center; }
+.pw-inner { width: 100%; max-width: 390px; padding: 48px 32px; display: flex; flex-direction: column; }
+.pw-stop { font-family: 'Share', sans-serif; font-weight: 700; font-size: 56px; line-height: 1.0; letter-spacing: -0.02em; color: #FFC700; text-transform: uppercase; margin-bottom: 24px; text-align: right; }
+.pw-sub { font-family: 'Share', sans-serif; font-weight: 400; font-size: 14px; color: rgba(255,255,255,0.55); line-height: 1.6; margin-bottom: 18px; text-align: center; text-transform: uppercase; letter-spacing: 0.05em; }
+.pw-price { font-family: 'Share', sans-serif; font-weight: 700; font-size: 62px; color: #fff; line-height: 1; margin-bottom: 20px; text-align: center; }
 .pw-once { display: none; }
-.pw-features { font-family: 'Share', sans-serif; font-weight: 400; font-size: 14px; color: rgba(255,255,255,0.45); margin-bottom: 36px; line-height: 2; list-style: none; padding: 0; text-align: center; text-transform: uppercase; letter-spacing: 0.05em; }
+.pw-features { font-family: 'Share', sans-serif; font-weight: 400; font-size: 13px; color: rgba(255,255,255,0.4); margin-bottom: 40px; line-height: 2.2; list-style: none; padding: 0; text-align: center; text-transform: uppercase; letter-spacing: 0.06em; }
 .pw-btn { font-family: 'Share', sans-serif; font-weight: 700; font-size: 17px; color: #FFC700; background: none; border: 2px solid #FFC700; border-radius: 100px; padding: 16px 40px; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 0.08s; text-transform: uppercase; letter-spacing: 0.04em; align-self: center; }
 .pw-btn:active { transform: scale(0.94); }
 
@@ -236,8 +238,6 @@ body.keyboard-nav #poster-link:focus {
 }
 @media screen and (orientation: landscape) and (min-width: 900px) {
   #app { max-width: 100vw; left: 0; transform: none; }
-  /* Center paywall + seen-limit in a 430px column on wide screens */
-  #paywall, #seen-limit { padding-left: max(calc(50vw - 215px), 40px); padding-right: max(calc(50vw - 215px), 40px); }
   /* HOME */
   .home-block { right: 6vw; top: 50%; transform: translateY(-50%); }
   .home-decided, .home-now, .cinefilo-word { font-size: clamp(80px, 12vw, 200px); }
@@ -364,25 +364,29 @@ body.keyboard-nav #poster-link:focus {
 
 <!-- PAYWALL -->
 <div class="screen" id="paywall">
-  <div class="pw-stop">STOP<br>SCROLLING.<br>START<br>LIVING.</div>
-  <div class="pw-sub">One decision per night.<br>Cancel anytime.</div>
-  <div class="pw-price">$1.99</div>
-  <ul class="pw-features">
-    <li>Unlimited recommendations</li>
-    <li>All moods &amp; platforms</li>
-    <li>No ads. Ever.</li>
-  </ul>
-  <button class="pw-btn" onclick="buyNow()">GET DECIDED NOW.</button>
+  <div class="pw-inner">
+    <div class="pw-stop">STOP<br>SCROLLING.<br>START<br>LIVING.</div>
+    <div class="pw-sub">One decision per night.<br>Cancel anytime.</div>
+    <div class="pw-price">$1.99</div>
+    <ul class="pw-features">
+      <li>Unlimited recommendations</li>
+      <li>All moods &amp; platforms</li>
+      <li>No ads. Ever.</li>
+    </ul>
+    <button class="pw-btn" onclick="buyNow()">GET DECIDED NOW.</button>
+  </div>
 </div>
 
 <!-- SEEN-LIMIT (paid users daily cap) -->
 <div class="screen" id="seen-limit">
-  <div class="sl-title"><span class="sl-muted">LIMIT</span><br><span class="sl-bold">REACHED.</span></div>
-  <div class="sl-headline">YOUR TIME IS MORE<br>VALUABLE THAN A SCROLL.</div>
-  <div class="sl-sub">Come back tomorrow<br>or choose what we recommend.</div>
-  <div class="sl-btns">
-    <button class="sl-btn" onclick="revisitPick(0)">REVISIT PICK 1</button>
-    <button class="sl-btn" onclick="revisitPick(1)">REVISIT PICK 2</button>
+  <div class="sl-inner">
+    <div class="sl-title"><span class="sl-muted">LIMIT</span><br><span class="sl-bold">REACHED.</span></div>
+    <div class="sl-headline">YOUR TIME IS MORE<br>VALUABLE THAN A SCROLL.</div>
+    <div class="sl-sub">Come back tomorrow<br>or choose what we recommend.</div>
+    <div class="sl-btns">
+      <button class="sl-btn" onclick="revisitPick(0)">REVISIT PICK 1</button>
+      <button class="sl-btn" onclick="revisitPick(1)">REVISIT PICK 2</button>
+    </div>
   </div>
 </div>
 
@@ -394,10 +398,10 @@ try {
   usageCount = parseInt(localStorage.getItem('dn_uses') || '0');
   paid = paid || localStorage.getItem('dn_paid') === '1';
 } catch(e) {}
-// ?dev2 → test seen-limit screen (paid + daily cap already hit)
+// ?dev2 → test seen-limit (paid + 1 seen already used, so 2nd SEEN IT hits limit)
 if (location.search.includes('dev2')) {
   paid = true;
-  try { localStorage.setItem(('dn_seen_' + new Date().toDateString()), '2'); } catch(e) {}
+  try { localStorage.setItem(('dn_seen_' + new Date().toDateString()), '1'); } catch(e) {}
 }
 let filteredList = [];
 let currentIdx = 0;
