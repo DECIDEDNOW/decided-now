@@ -203,7 +203,7 @@ html, body {
 #seen-limit { display: flex; align-items: center; justify-content: center; }
 .sl-inner { width: 100%; max-width: 390px; padding: 48px 32px; display: flex; flex-direction: column; }
 .sl-title { font-family: 'Share', sans-serif; font-weight: 700; font-size: 56px; line-height: 1.0; letter-spacing: -0.02em; text-transform: uppercase; text-align: right; margin-bottom: 32px; }
-.sl-title span.sl-muted { color: rgba(255,255,255,0.28); display: block; }
+.sl-title span.sl-muted { color: rgba(255,255,255,0.75); display: block; }
 .sl-title span.sl-bold  { color: #FFC700; display: block; }
 .sl-headline { font-family: 'Share', sans-serif; font-weight: 700; font-size: 34px; color: rgba(255,255,255,0.75); line-height: 1.15; text-transform: uppercase; letter-spacing: -0.01em; margin-bottom: 20px; text-align: right; }
 .sl-sub { font-family: 'Share', sans-serif; font-weight: 400; font-size: 13px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.07em; line-height: 1.7; text-align: center; margin-bottom: 48px; }
@@ -380,7 +380,7 @@ body.keyboard-nav #poster-link:focus {
 <!-- SEEN-LIMIT (paid users daily cap) -->
 <div class="screen" id="seen-limit">
   <div class="sl-inner">
-    <div class="sl-title"><span class="sl-muted">LIMIT</span><br><span class="sl-bold">REACHED.</span></div>
+    <div class="sl-title"><span class="sl-muted">LIMIT</span><span class="sl-bold">REACHED.</span></div>
     <div class="sl-headline">YOUR TIME IS MORE<br>VALUABLE THAN A SCROLL.</div>
     <div class="sl-sub">Come back tomorrow<br>or choose what we recommend.</div>
     <div class="sl-btns">
@@ -393,23 +393,39 @@ body.keyboard-nav #poster-link:focus {
 <script>
 const S = { depth: null, platforms: new Set(), mood: null, format: 'movie' };
 let usageCount = 0;
-let paid = location.search.includes('dev');
+let paid = location.search.includes('dev') && !location.search.includes('dev2');
 try {
   usageCount = parseInt(localStorage.getItem('dn_uses') || '0');
   paid = paid || localStorage.getItem('dn_paid') === '1';
 } catch(e) {}
-// ?dev2 → test seen-limit (paid + 1 seen already used, so 2nd SEEN IT hits limit)
+// ?reset → wipe all localStorage to test the free-user flow cleanly
+if (location.search.includes('reset')) {
+  try { localStorage.clear(); } catch(e) {}
+  paid = false; usageCount = 0;
+}
+// ?dev2 → jump straight to seen-limit screen (paid, daily cap already hit)
 if (location.search.includes('dev2')) {
   paid = true;
-  try { localStorage.setItem(('dn_seen_' + new Date().toDateString()), '1'); } catch(e) {}
+  try {
+    var _k2 = [];
+    for (var _i2 = 0; _i2 < localStorage.length; _i2++) {
+      if (localStorage.key(_i2) && localStorage.key(_i2).startsWith('dn_seen_')) _k2.push(localStorage.key(_i2));
+    }
+    _k2.forEach(function(k) { localStorage.removeItem(k); });
+    localStorage.setItem('dn_seen_' + new Date().toDateString(), '2');
+  } catch(e) {}
 }
 let filteredList = [];
 let currentIdx = 0;
-let dailyPicks = []; // stores last 2 movies shown to paid users
+let dailyPicks = []; // stores today's 2 picks (persisted in localStorage)
+try {
+  var _sp = localStorage.getItem('dn_picks_' + new Date().toDateString());
+  if (_sp) dailyPicks = JSON.parse(_sp);
+} catch(e) {}
 
 const CATALOG = [
   {id:1,  title:"Squid Game",                 year:2021, format:"series", depth:"light", moods:["tension"],           platforms:["netflix"],            poster:"https://image.tmdb.org/t/p/w500/1QdXdRYfktUSONkl1oD5gc6Be0s.jpg", links:{netflix:"https://www.netflix.com/title/81040344"}},
-  {id:2,  title:"Roma",                        year:2018, format:"movie",  depth:"deep",  moods:["switchoff","focus"], platforms:["netflix"],            poster:"https://images.justwatch.com/poster/88518655/s332/roma-2018.webp", links:{netflix:"https://www.netflix.com/title/80240715"}},
+  {id:2,  title:"Roma",                        year:2018, format:"movie",  depth:"deep",  moods:["switchoff","focus"], platforms:["netflix"],            poster:"https://image.tmdb.org/t/p/w500/dtIIyQyALk57ko5bjac7hi01YQ.jpg", links:{netflix:"https://www.netflix.com/title/80240715"}},
   {id:3,  title:"Dark",                        year:2017, format:"series", depth:"deep",  moods:["tension"],           platforms:["netflix"],            poster:"https://image.tmdb.org/t/p/w500/apbrbWs8M9lyOpJYU5WXrpFbk1Z.jpg", links:{netflix:"https://www.netflix.com/title/80100172"}},
   {id:4,  title:"Stranger Things",             year:2016, format:"series", depth:"light", moods:["tension","switchoff"],platforms:["netflix"],            poster:"https://image.tmdb.org/t/p/w500/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg", links:{netflix:"https://www.netflix.com/title/80057281"}},
   {id:5,  title:"Marriage Story",              year:2019, format:"movie",  depth:"deep",  moods:["focus"],             platforms:["netflix"],            poster:"https://image.tmdb.org/t/p/w500/2JRyCKaRKyJAVpsIHeLvPw5nHmw.jpg", links:{netflix:"https://www.netflix.com/title/80223779"}},
@@ -433,8 +449,8 @@ const CATALOG = [
   {id:22, title:"The Mandalorian",             year:2019, format:"series", depth:"light", moods:["switchoff"],         platforms:["disney"],             poster:"https://image.tmdb.org/t/p/w500/sWgBv7LV2PRoQgkxwlibdGXKz1S.jpg", links:{disney:"https://www.disneyplus.com/series/the-mandalorian/3jLIGMDYINqD"}},
   {id:23, title:"Andor",                       year:2022, format:"series", depth:"deep",  moods:["tension"],           platforms:["disney"],             poster:"https://image.tmdb.org/t/p/w500/khZqmwHQicTYoS7Flreb9EddFZC.jpg", links:{disney:"https://www.disneyplus.com/series/andor/21meMmcvczTe"}},
   {id:24, title:"Luca",                        year:2021, format:"movie",  depth:"light", moods:["laugh"],             platforms:["disney"],             poster:"https://image.tmdb.org/t/p/w500/9x4i9uKGXt8IiiIF5Ey0DIoY738.jpg", links:{disney:"https://www.disneyplus.com/movies/luca/2oVhB4z2qVtf"}},
-  {id:25, title:"The Bear",                    year:2022, format:"series", depth:"deep",  moods:["tension","focus"],   platforms:["hulu","disney"],      poster:"https://images.justwatch.com/poster/305353236/s332/the-bear.webp", links:{hulu:"https://www.hulu.com/series/the-bear", disney:"https://www.disneyplus.com/browse/entity-05eb6a8e-90ed-4947-8c0b-e6536cbddd5f"}},
-  {id:26, title:"Abbott Elementary",           year:2021, format:"series", depth:"light", moods:["laugh"],             platforms:["hulu","disney"],      poster:"https://images.justwatch.com/poster/321865589/s332/abbott-elementary.webp", links:{hulu:"https://www.hulu.com/series/abbott-elementary", disney:"https://www.disneyplus.com/browse/entity-19c47a8f-8ef9-400c-9840-647e7c559f08"}},
+  {id:25, title:"The Bear",                    year:2022, format:"series", depth:"deep",  moods:["tension","focus"],   platforms:["hulu","disney"],      poster:"https://image.tmdb.org/t/p/w500/eKfVzzEazSIjJMrw9ADa2x8ksLz.jpg", links:{hulu:"https://www.hulu.com/series/the-bear", disney:"https://www.disneyplus.com/browse/entity-05eb6a8e-90ed-4947-8c0b-e6536cbddd5f"}},
+  {id:26, title:"Abbott Elementary",           year:2021, format:"series", depth:"light", moods:["laugh"],             platforms:["hulu","disney"],      poster:"https://image.tmdb.org/t/p/w500/nBe1e3JJEZ6veGrVXNF0fRoLu56.jpg", links:{hulu:"https://www.hulu.com/series/abbott-elementary", disney:"https://www.disneyplus.com/browse/entity-19c47a8f-8ef9-400c-9840-647e7c559f08"}},
   {id:27, title:"Parasite",                    year:2019, format:"movie",  depth:"deep",  moods:["tension"],           platforms:["mubi"],     poster:"https://image.tmdb.org/t/p/w500/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg", links:{mubi:"https://mubi.com/en/films/parasite"}},
   {id:28, title:"Portrait of a Lady on Fire",  year:2019, format:"movie",  depth:"deep",  moods:["focus"],             platforms:["mubi"],               poster:"https://image.tmdb.org/t/p/w500/2LquGwEhbg3soxSCs9VNyh5VJd9.jpg", links:{mubi:"https://mubi.com/en/films/portrait-of-a-lady-on-fire"}},
   {id:29, title:"Past Lives",                  year:2023, format:"movie",  depth:"deep",  moods:["focus"],             platforms:["mubi","amazon"],      poster:"https://image.tmdb.org/t/p/w500/wjOHjWCUE0YzDiEzKv8AfqHj3ir.jpg", links:{mubi:"https://mubi.com/en/films/past-lives", amazon:"https://www.amazon.com/gp/video/detail/amzn1.dv.gti.33278892-b325-4e22-926d-81be76bc6795"}},
@@ -868,18 +884,18 @@ const CATALOG = [
   {id:401, title:"Leyendas",              year:2026, format:"series", depth:"deep",  moods:["tension","focus"], platforms:["netflix"],   poster:"https://image.tmdb.org/t/p/w500/dGienbU1xNZJcbY8i8ubJusjDwD.jpg", links:{netflix:"https://www.netflix.com/title/81708404"}},
 
   // ===== AGREGADOS DESDE DRIVE - MAYO 2026 =====
-  {id:432, title:"53 domingos",                  year:2025, format:"movie",  depth:"deep",  moods:["focus","switchoff"],         platforms:["netflix"],             poster:"https://images.justwatch.com/poster/336731200/s332/53-domingos.webp",            links:{netflix:"https://www.netflix.com/title/81790853"}},
+  {id:432, title:"53 domingos",                  year:2026, format:"movie",  depth:"deep",  moods:["focus","switchoff"],         platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/olk6MkfHFWEpWmhQn6Mb4jNqspm.jpg",             links:{netflix:"https://www.netflix.com/title/81790853"}},
   {id:433, title:"Hogar",                        year:2020, format:"movie",  depth:"light", moods:["tension"],                   platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/d4fX6ZIuGI2S6KmMzQJGYHFyOWI.jpg",              links:{netflix:"https://www.netflix.com/title/81074374"}},
   {id:434, title:"El caso Asunta",               year:2024, format:"series", depth:"deep",  moods:["tension","focus"],           platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/A6i2gfmOjHh4gCkFrOdT9XFQ5lW.jpg",              links:{netflix:"https://www.netflix.com/title/81421019"}},
   {id:435, title:"El inocente",                  year:2021, format:"series", depth:"deep",  moods:["tension"],                   platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/kksDHABZ5aXIaXkQYBJrHIi2HEt.jpg",              links:{netflix:"https://www.netflix.com/title/81447218"}},
-  {id:436, title:"Salvador",                     year:2025, format:"series", depth:"deep",  moods:["tension","focus"],           platforms:["netflix"],             poster:"https://images.justwatch.com/poster/336369000/s332/salvador.webp",               links:{netflix:"https://www.netflix.com/title/81716369"}},
+  {id:436, title:"Salvador",                     year:2026, format:"series", depth:"deep",  moods:["tension","focus"],           platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/8pLnnRB2qG1vZHXpjm2gVFNyUX.jpg",              links:{netflix:"https://www.netflix.com/title/81716369"}},
   {id:437, title:"Mar adentro",                  year:2004, format:"movie",  depth:"deep",  moods:["focus"],                    platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/9fhJMqvmHpNJHhfHJ5BsmEnFXFq.jpg",              links:{netflix:"https://www.netflix.com/title/70028516"}},
   {id:438, title:"Perfect Days",                 year:2023, format:"movie",  depth:"deep",  moods:["switchoff","focus"],         platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/6gP2MBMOHYKqHkxIBmPMg0rXmHd.jpg",              links:{netflix:"https://www.netflix.com/title/81659333"}},
   {id:439, title:"El secreto de sus ojos",       year:2009, format:"movie",  depth:"deep",  moods:["tension","focus"],           platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/dkeAwfZzwL3WvToydE3CXiY80E0.jpg",              links:{netflix:"https://www.netflix.com/title/70131482"}},
   {id:440, title:"Lupin",                        year:2021, format:"series", depth:"light", moods:["tension","switchoff"],       platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/sgNcGHoRMRTSxDTlmAmItGPBrUL.jpg",              links:{netflix:"https://www.netflix.com/title/80994082"}},
   {id:441, title:"The Lincoln Lawyer",           year:2022, format:"series", depth:"light", moods:["tension","focus"],           platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/zOO8JxcHPJBDGe8Jf1B2exvwnqq.jpg",              links:{netflix:"https://www.netflix.com/title/81445762"}},
-  {id:442, title:"Clanes",                       year:2024, format:"series", depth:"deep",  moods:["tension"],                   platforms:["netflix"],             poster:"https://images.justwatch.com/poster/320631750/s332/clanes.webp",                links:{netflix:"https://www.netflix.com/title/81631750"}},
-  {id:443, title:"Mano de hierro",               year:2024, format:"series", depth:"light", moods:["tension"],                   platforms:["netflix"],             poster:"https://images.justwatch.com/poster/318643320/s332/mano-de-hierro.webp",         links:{netflix:"https://www.netflix.com/title/81643320"}},
+  {id:442, title:"Clanes",                       year:2024, format:"series", depth:"deep",  moods:["tension"],                   platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/sp63Z2BLpOpsvv9G9g4xArY1HnN.jpg",             links:{netflix:"https://www.netflix.com/title/81631750"}},
+  {id:443, title:"Mano de hierro",               year:2024, format:"series", depth:"light", moods:["tension"],                   platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/zaU1gsFnhyWnzUXFLPfDKngC2AE.jpg",             links:{netflix:"https://www.netflix.com/title/81643320"}},
   {id:444, title:"The Blacklist",                year:2013, format:"series", depth:"light", moods:["tension","switchoff"],       platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/lEROZcCpTBEuCXPpMOjqvjJBPJm.jpg",              links:{netflix:"https://www.netflix.com/title/70279852"}},
   {id:445, title:"The Gentlemen",                year:2024, format:"series", depth:"light", moods:["tension","laugh"],           platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/gnFoSVqLYQoTZ9T5RBgAVEQ5nDp.jpg",              links:{netflix:"https://www.netflix.com/title/81748308"}},
   {id:446, title:"The Gentlemen",                year:2019, format:"movie",  depth:"light", moods:["tension","laugh"],           platforms:["amazon"],              poster:"https://image.tmdb.org/t/p/w500/jtrhTYB7xSrJxR1vusu99nvnZ1g.jpg",              links:{amazon:"https://www.amazon.com/gp/video/detail/amzn1.dv.gti.4c9e9fe4-8e4d-4e8e-b00f-6bf1e274c91a"}},
@@ -887,8 +903,8 @@ const CATALOG = [
   {id:448, title:"Casi leyendas",                year:2017, format:"movie",  depth:"light", moods:["laugh","switchoff"],         platforms:["disney"],              poster:"https://image.tmdb.org/t/p/w500/3c93g0DcBdm6YvKNgiqvfKuXCYr.jpg",              links:{disney:"https://www.disneyplus.com/movies/casi-leyendas/2sOQYFyAmj1S"}},
   {id:449, title:"Historias para no contar",     year:2022, format:"movie",  depth:"light", moods:["laugh","focus"],             platforms:["amazon"],              poster:"https://image.tmdb.org/t/p/w500/bQvpFhAST59xJcX1v7fdLTbwXd9.jpg",              links:{amazon:"https://www.amazon.com/gp/video/detail/amzn1.dv.gti.7e113115-f3d3-4c22-b001-6c13113115ab"}},
   {id:450, title:"Los lunes al sol",             year:2002, format:"movie",  depth:"deep",  moods:["focus"],                    platforms:["hbo"],                 poster:"https://image.tmdb.org/t/p/w500/sYWtDnEHDcHchgwkr17lBbqz4gU.jpg",              links:{hbo:"https://www.max.com/movies/los-lunes-al-sol"}},
-  {id:451, title:"Zeta",                         year:2025, format:"movie",  depth:"light", moods:["tension"],                   platforms:["amazon"],              poster:"https://images.justwatch.com/poster/334220000/s332/zeta.webp",                  links:{amazon:"https://www.amazon.com/gp/video/detail/amzn1.dv.gti.e4134220-f3d3-4c22-8001-6c13134220ab"}},
-  {id:452, title:"Young Sherlock",               year:2025, format:"series", depth:"light", moods:["tension","focus"],           platforms:["amazon"],              poster:"https://images.justwatch.com/poster/335805004/s332/young-sherlock.webp",         links:{amazon:"https://www.amazon.com/gp/video/search/ref=atv_nb_sr?phrase=Young+Sherlock"}},
+  {id:451, title:"Zeta",                         year:2026, format:"movie",  depth:"light", moods:["tension"],                   platforms:["amazon"],              poster:"https://image.tmdb.org/t/p/w500/tEFMZGcmxBDCodbLAqmrjdjCTwm.jpg",             links:{amazon:"https://www.amazon.com/dp/B0FLNB3VCC"}},
+  {id:452, title:"Young Sherlock",               year:2026, format:"series", depth:"light", moods:["tension","focus"],           platforms:["amazon"],              poster:"https://image.tmdb.org/t/p/w500/h3s0Cd2JppeWA4UjTuSRauL52P7.jpg",             links:{amazon:"https://www.amazon.com/dp/B0F54T9YCN"}},
   {id:453, title:"Clark",                        year:2022, format:"series", depth:"light", moods:["laugh","tension"],           platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/xbxSHiTHnkNVRGKQKoXPMOJGNxG.jpg",              links:{netflix:"https://www.netflix.com/title/81538073"}},
   {id:454, title:"Obsession",                    year:2023, format:"series", depth:"light", moods:["tension"],                   platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/kT5tdNBDUkqFKLq3oJNgR3OfRqY.jpg",              links:{netflix:"https://www.netflix.com/title/81372832"}},
 ];
@@ -953,7 +969,26 @@ function getRecommendations() {
   return CATALOG;
 }
 
-function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+function shuffle(arr) {
+  var a = [...arr];
+  for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+  return a;
+}
+// Prioritise movies the user hasn't seen before; resets automatically when all are watched
+function shuffleWithHistory(arr) {
+  try {
+    var seenIds = new Set(JSON.parse(localStorage.getItem('dn_history') || '[]'));
+    var fresh = arr.filter(function(m) { return !seenIds.has(m.id); });
+    if (fresh.length === 0) {
+      try { localStorage.setItem('dn_history', '[]'); } catch(e) {}
+      return shuffle(arr);
+    }
+    return shuffle(fresh).concat(shuffle(arr.filter(function(m) { return seenIds.has(m.id); })));
+  } catch(e) { return shuffle(arr); }
+}
+function saveDailyPicks() {
+  try { localStorage.setItem('dn_picks_' + new Date().toDateString(), JSON.stringify(dailyPicks)); } catch(e) {}
+}
 
 function saveUses() { try { localStorage.setItem('dn_uses', usageCount); } catch(e) {} }
 
@@ -962,8 +997,11 @@ function showDecision() {
     usageCount++;
     saveUses();
     if (usageCount > 2) { goTo('paywall'); return; }
+  } else {
+    var _st = parseInt(localStorage.getItem(getDailyKey()) || '0');
+    if (_st >= 2) { goTo('seen-limit'); return; }
   }
-  filteredList = shuffle(getRecommendations());
+  filteredList = shuffleWithHistory(getRecommendations());
   currentIdx = 0;
   renderRec(filteredList[0]);
   goTo('pelicula');
@@ -994,10 +1032,15 @@ function revisitPick(n) {
 }
 
 function renderRec(movie) {
-  if (paid && !dailyPicks.includes(movie)) {
+  if (paid && !dailyPicks.some(function(m){ return m.id === movie.id; })) {
     dailyPicks.unshift(movie);
     if (dailyPicks.length > 2) dailyPicks.length = 2;
+    saveDailyPicks();
   }
+  try {
+    var _h = JSON.parse(localStorage.getItem('dn_history') || '[]');
+    if (!_h.includes(movie.id)) { _h.push(movie.id); if (_h.length > 400) _h = _h.slice(_h.length - 400); localStorage.setItem('dn_history', JSON.stringify(_h)); }
+  } catch(e) {}
   var img  = document.getElementById('movie-poster');
   var wrap = document.getElementById('poster-link');
   wrap.classList.remove('img-loading', 'img-error');
@@ -1103,6 +1146,18 @@ function buyNow() {
   document.addEventListener('touchstart',  function(){ document.body.classList.remove('keyboard-nav'); });
   document.addEventListener('mousedown',   function(){ document.body.classList.remove('keyboard-nav'); });
 })();
+
+// ── ON-LOAD: restore seen-limit for paid users who already hit today's cap ──
+try {
+  if (paid && parseInt(localStorage.getItem('dn_seen_' + new Date().toDateString()) || '0') >= 2) {
+    // dev2 with no saved picks → pre-populate with first 2 catalog entries for preview
+    if (dailyPicks.length === 0 && location.search.includes('dev2')) {
+      dailyPicks = [CATALOG[0], CATALOG[1]];
+      saveDailyPicks();
+    }
+    goTo('seen-limit');
+  }
+} catch(e) {}
 
 // ── SERVICE WORKER ───────────────────────────────────────────
 if ('serviceWorker' in navigator) {
