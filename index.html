@@ -223,17 +223,41 @@ html, body {
 .pw-btn:active { transform: scale(0.94); }
 
 /* ══ TV / LANDSCAPE ══ */
-/* Remove default focus outline; show only with keyboard */
+/* Remove default focus outline; TV/keyboard nav applies its own highlight */
 * { outline: none; }
+
+/* Words (cinéfilo, mood) — go full yellow + slight scale */
 body.keyboard-nav .cinefilo-word:focus,
-body.keyboard-nav .plat-tile:focus,
-body.keyboard-nav .mood-word:focus,
-body.keyboard-nav .fmt-btn:focus,
+body.keyboard-nav .mood-word:focus {
+  color: #FFC700 !important;
+  text-shadow: 0 0 32px rgba(255,199,0,0.45);
+  transform: scale(1.06);
+}
+/* Platform tiles — yellow border + glow + scale */
+body.keyboard-nav .plat-tile:focus {
+  border-color: #FFC700;
+  box-shadow: 0 0 0 3px rgba(255,199,0,0.45), 0 0 22px rgba(255,199,0,0.25);
+  transform: scale(1.1);
+}
+/* Format toggle buttons */
+body.keyboard-nav .fmt-btn:focus {
+  color: #FFC700;
+  outline: 3px solid rgba(255,199,0,0.75);
+  outline-offset: 8px;
+  border-radius: 6px;
+}
+/* Action buttons (watch, seen-it, sl-btn, pw-btn) */
 body.keyboard-nav .watch-btn:focus,
 body.keyboard-nav .seen-it:focus,
+body.keyboard-nav .sl-btn:focus,
+body.keyboard-nav .pw-btn:focus {
+  box-shadow: 0 0 0 4px rgba(255,199,0,0.85), 0 0 26px rgba(255,199,0,0.35);
+  transform: scale(1.05);
+}
+/* Poster link */
 body.keyboard-nav #poster-link:focus {
   outline: 4px solid #FFC700;
-  outline-offset: 10px;
+  outline-offset: 8px;
   border-radius: 8px;
 }
 @media screen and (orientation: landscape) and (min-width: 900px) {
@@ -1127,9 +1151,14 @@ function buyNow() {
 
 // ── TV / KEYBOARD NAVIGATION ─────────────────────────────────
 (function() {
+  // Activate keyboard-nav immediately so TV sees the highlight from the first frame.
+  // On mobile/desktop it gets cleared on the first touch or click.
+  document.body.classList.add('keyboard-nav');
+
   function makeFocusable() {
-    document.querySelectorAll('#home, .cinefilo-word, .mood-word, .seen-it')
-      .forEach(function(el){ if (!el.getAttribute('tabindex')) el.setAttribute('tabindex','0'); });
+    document.querySelectorAll(
+      '#home, .cinefilo-word, .mood-word, .seen-it, .sl-btn, .pw-btn, .plat-tile, .fmt-btn, .watch-btn'
+    ).forEach(function(el){ if (!el.getAttribute('tabindex')) el.setAttribute('tabindex','0'); });
   }
   setTimeout(makeFocusable, 100);
 
@@ -1137,59 +1166,106 @@ function buyNow() {
     if (!screen) return [];
     if (screen.id === 'home') return [screen];
     return Array.from(screen.querySelectorAll(
-      '.cinefilo-word, .plat-tile, .mood-word, .fmt-btn, .watch-btn, .seen-it, #poster-link'
+      '.cinefilo-word, .plat-tile, .mood-word, .fmt-btn, .watch-btn, .seen-it, #poster-link, .sl-btn, .pw-btn'
     )).filter(function(el){ return getComputedStyle(el).display !== 'none'; });
   }
 
+  // Spatial 2D navigation — finds the nearest element in the given direction
+  // using real screen positions (getBoundingClientRect). Crucial for the
+  // platform grid where tiles sit in rows and columns.
+  function nearestIn(els, from, dir) {
+    if (!from || typeof from.getBoundingClientRect !== 'function') return null;
+    var fr = from.getBoundingClientRect();
+    var fx = fr.left + fr.width  / 2;
+    var fy = fr.top  + fr.height / 2;
+    var best = null, bestScore = Infinity;
+    els.forEach(function(el) {
+      if (el === from) return;
+      var r  = el.getBoundingClientRect();
+      var ex = r.left + r.width  / 2;
+      var ey = r.top  + r.height / 2;
+      var dx = ex - fx, dy = ey - fy;
+      var ok = (dir === 'right' && dx >  15) ||
+               (dir === 'left'  && dx < -15) ||
+               (dir === 'down'  && dy >  15) ||
+               (dir === 'up'    && dy < -15);
+      if (!ok) return;
+      var primary = (dir === 'right' || dir === 'left') ? Math.abs(dx) : Math.abs(dy);
+      var lateral = (dir === 'right' || dir === 'left') ? Math.abs(dy) : Math.abs(dx);
+      var score = primary + lateral * 3; // penalise sideways drift
+      if (score < bestScore) { bestScore = score; best = el; }
+    });
+    return best;
+  }
+
+  // Wrap goTo so every screen transition auto-focuses its first item —
+  // no condition: TV always wants focus, and mobile/desktop lose keyboard-nav
+  // on the next touch/click anyway.
   var _goTo = goTo;
   window.goTo = function(id) {
     _goTo(id);
     setTimeout(function(){
-      if (document.body.classList.contains('keyboard-nav')) {
-        var els = getFocusables(document.getElementById(id));
-        if (els[0]) els[0].focus();
-      }
+      var els = getFocusables(document.getElementById(id));
+      if (els[0]) els[0].focus();
     }, 260);
   };
 
   document.addEventListener('keydown', function(e) {
     var screen = document.querySelector('.screen.active');
     if (!screen) return;
+    document.body.classList.add('keyboard-nav');
+
     var els   = getFocusables(screen);
     var focus = document.activeElement;
     var idx   = els.indexOf(focus);
 
-    switch (e.key) {
+    // Normalise TV remote Back key (Samsung Tizen: 10009 · LG WebOS: 461)
+    var key = e.key;
+    if (e.keyCode === 10009 || e.keyCode === 461) key = 'Backspace';
+
+    switch (key) {
       case 'Enter': case ' ':
         e.preventDefault();
-        document.body.classList.add('keyboard-nav');
         if (focus && screen.contains(focus)) { focus.click(); }
-        else if (screen.id === 'home') { screen.click(); }
-        else if (els[0]) { els[0].focus(); }
+        else if (screen.id === 'home')       { screen.click(); }
+        else if (els[0])                     { els[0].focus(); }
         break;
-      case 'ArrowRight': case 'ArrowDown':
+
+      case 'ArrowRight':
         e.preventDefault();
-        document.body.classList.add('keyboard-nav');
-        if (screen.id === 'pelicula' && e.key === 'ArrowRight') { nextRec(); return; }
-        els[idx < els.length - 1 ? idx + 1 : 0].focus();
+        if (screen.id === 'pelicula') { nextRec(); return; }
+        (nearestIn(els, focus, 'right') || els[idx < els.length - 1 ? idx + 1 : 0]).focus();
         break;
-      case 'ArrowLeft': case 'ArrowUp':
+
+      case 'ArrowLeft':
         e.preventDefault();
-        document.body.classList.add('keyboard-nav');
-        if (idx > 0) els[idx - 1].focus(); else els[els.length - 1].focus();
+        (nearestIn(els, focus, 'left') || (idx > 0 ? els[idx - 1] : els[els.length - 1])).focus();
         break;
+
+      case 'ArrowDown':
+        e.preventDefault();
+        (nearestIn(els, focus, 'down') || els[idx < els.length - 1 ? idx + 1 : 0]).focus();
+        break;
+
+      case 'ArrowUp':
+        e.preventDefault();
+        (nearestIn(els, focus, 'up') || (idx > 0 ? els[idx - 1] : els[els.length - 1])).focus();
+        break;
+
       case 'Backspace': case 'Escape':
         e.preventDefault();
         S.depth = null; S.platforms.clear(); S.mood = null; S.format = 'movie';
-        document.querySelectorAll('.plat-tile,.cinefilo-word,.mood-word,.fmt-btn').forEach(function(el){ el.classList.remove('on'); });
+        document.querySelectorAll('.plat-tile,.cinefilo-word,.mood-word,.fmt-btn')
+          .forEach(function(el){ el.classList.remove('on'); });
         document.getElementById('f-movie').classList.add('on');
         goTo('home');
         break;
     }
   });
-  document.addEventListener('keydown',     function(){ document.body.classList.add('keyboard-nav'); });
-  document.addEventListener('touchstart',  function(){ document.body.classList.remove('keyboard-nav'); });
-  document.addEventListener('mousedown',   function(){ document.body.classList.remove('keyboard-nav'); });
+
+  // Mobile / desktop: remove keyboard-nav on first interaction
+  document.addEventListener('touchstart', function(){ document.body.classList.remove('keyboard-nav'); }, {passive:true});
+  document.addEventListener('mousedown',  function(){ document.body.classList.remove('keyboard-nav'); });
 })();
 
 // ── ON-LOAD: restore seen-limit for paid users who already hit today's cap ──
