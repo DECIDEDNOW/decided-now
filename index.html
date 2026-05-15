@@ -394,6 +394,7 @@ body.keyboard-nav #poster-link:focus {
 const S = { depth: null, platforms: new Set(), mood: null, format: 'movie' };
 let usageCount = 0;
 let paid = location.search.includes('dev') && !location.search.includes('dev2');
+let devMode = false; // ?dev2 = paid + zero limits, for testing all movies
 try {
   usageCount = parseInt(localStorage.getItem('dn_uses') || '0');
   paid = paid || localStorage.getItem('dn_paid') === '1';
@@ -403,17 +404,10 @@ if (location.search.includes('reset')) {
   try { localStorage.clear(); } catch(e) {}
   paid = false; usageCount = 0;
 }
-// ?dev2 → jump straight to seen-limit screen (paid, daily cap already hit)
+// ?dev2 → fully unlocked testing mode: paid, no daily cap, no paywall, infinite swipes
 if (location.search.includes('dev2')) {
   paid = true;
-  try {
-    var _k2 = [];
-    for (var _i2 = 0; _i2 < localStorage.length; _i2++) {
-      if (localStorage.key(_i2) && localStorage.key(_i2).startsWith('dn_seen_')) _k2.push(localStorage.key(_i2));
-    }
-    _k2.forEach(function(k) { localStorage.removeItem(k); });
-    localStorage.setItem('dn_seen_' + new Date().toDateString(), '2');
-  } catch(e) {}
+  devMode = true;
 }
 let filteredList = [];
 let currentIdx = 0;
@@ -927,7 +921,7 @@ const CATALOG = [
   {id:472, title:"Unorthodox",                    year:2020, format:"series", depth:"deep",  moods:["focus","tension"],           platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/5VxoSKUlNFOuqBaw8kAHwEAtuHE.jpg",             links:{netflix:"https://www.netflix.com/title/81019069"}},
   {id:473, title:"The Night Of",                  year:2016, format:"series", depth:"deep",  moods:["tension","focus"],           platforms:["hbo"],                 poster:"https://image.tmdb.org/t/p/w500/q13XJHdnsmxQL9rXRcnNDrZGHjO.jpg",             links:{hbo:"https://www.max.com/shows/night-of/64c9bde2-1bef-4c8b-91fa-3f3c4e2ec9c3"}},
   {id:474, title:"Godless",                       year:2017, format:"series", depth:"deep",  moods:["tension","focus"],           platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/ePOD0ofGWFDTbZR84QhM7kpYMPX.jpg",             links:{netflix:"https://www.netflix.com/title/80097141"}},
-  {id:475, title:"The Night Manager",             year:2016, format:"series", depth:"deep",  moods:["tension"],                   platforms:["amazon"],              poster:"https://image.tmdb.org/t/p/w500/1MccRnw41qQjREuZkovqP2UX1i3.jpg",             links:{amazon:"https://www.primevideo.com/detail/0TWTZDEW8U30XSRS4CNR92KOIZ"}},
+  {id:475, title:"The Night Manager",             year:2016, format:"series", depth:"deep",  moods:["tension"],                   platforms:["amazon"],              poster:"https://image.tmdb.org/t/p/w500/1MccRnw41qQjREuZkovqP2UX1i3.jpg",             links:{amazon:"https://www.primevideo.com/detail/The-Night-Manager/0IV5WXSP5Q7XTPBSY98OT47XVF"}},
   {id:476, title:"Unbelievable",                  year:2019, format:"series", depth:"deep",  moods:["focus","tension"],           platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/jHOrNJNM03Lsjdw7nsw7TlqBOhd.jpg",             links:{netflix:"https://www.netflix.com/title/80153467"}},
   {id:477, title:"Bodyguard",                     year:2018, format:"series", depth:"light", moods:["tension"],                   platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/5DUJTrHTRLHLCKWriPhdusQogAv.jpg",             links:{netflix:"https://www.netflix.com/title/80235864"}},
   {id:478, title:"La chica de nieve",             year:2023, format:"series", depth:"deep",  moods:["tension"],                   platforms:["netflix"],             poster:"https://image.tmdb.org/t/p/w500/xoxglyQtYXsMk15DpsWVvbG1X9F.jpg",             links:{netflix:"https://www.netflix.com/title/81388035"}},
@@ -1032,7 +1026,9 @@ function saveDailyPicks() {
 function saveUses() { try { localStorage.setItem('dn_uses', usageCount); } catch(e) {} }
 
 function showDecision() {
-  if (!paid) {
+  if (devMode) {
+    // unrestricted test mode — no limits at all
+  } else if (!paid) {
     usageCount++;
     saveUses();
     if (usageCount > 2) { goTo('paywall'); return; }
@@ -1051,7 +1047,9 @@ function getDailyKey() { return 'dn_seen_' + new Date().toDateString(); }
 
 function nextRec() {
   if (navigator.vibrate) navigator.vibrate(8);
-  if (!paid) {
+  if (devMode) {
+    // unrestricted test mode — no limits at all
+  } else if (!paid) {
     usageCount++;
     saveUses();
     if (usageCount > 2) { goTo('paywall'); return; }
@@ -1189,12 +1187,7 @@ function buyNow() {
 
 // ── ON-LOAD: restore seen-limit for paid users who already hit today's cap ──
 try {
-  if (paid && parseInt(localStorage.getItem('dn_seen_' + new Date().toDateString()) || '0') >= 2) {
-    // dev2 with no saved picks → pre-populate with first 2 catalog entries for preview
-    if (dailyPicks.length === 0 && location.search.includes('dev2')) {
-      dailyPicks = [CATALOG[0], CATALOG[1]];
-      saveDailyPicks();
-    }
+  if (!devMode && paid && parseInt(localStorage.getItem('dn_seen_' + new Date().toDateString()) || '0') >= 2) {
     goTo('seen-limit');
   }
 } catch(e) {}
