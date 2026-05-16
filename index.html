@@ -450,8 +450,8 @@ if (location.search.includes('reset')) {
   try { localStorage.clear(); } catch(e) {}
   paid = false; usageCount = 0;
 }
-// ?dev2 → fully unlocked testing mode: paid, no daily cap, no paywall, infinite swipes
-if (location.search.includes('dev2')) {
+// ?dev2 or localStorage flag → fully unlocked testing mode: paid, no daily cap, no paywall, infinite swipes
+if (location.search.includes('dev2') || localStorage.getItem('dn_dev2') === '1') {
   paid = true;
   devMode = true;
 }
